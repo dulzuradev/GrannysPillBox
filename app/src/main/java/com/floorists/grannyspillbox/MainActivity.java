@@ -2,30 +2,39 @@ package com.floorists.grannyspillbox;
 
 
 import android.app.AlertDialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.floorists.grannyspillbox.classes.Medication;
+import com.floorists.grannyspillbox.classes.ScheduledEvent;
 import com.floorists.grannyspillbox.utilities.BarcodeCaptureActivity;
+import com.floorists.grannyspillbox.utilities.DownloadImageTask;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -42,6 +51,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -60,13 +70,23 @@ public class MainActivity extends AppCompatActivity
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setTitle("Add Medication");
 
-                final EditText medNameInput = new EditText(MainActivity.this);
-                medNameInput.setInputType(InputType.TYPE_CLASS_TEXT);
-                builder.setView(medNameInput);
 
-                builder.setPositiveButton("ADD", new DialogInterface.OnClickListener() {
+                // Layout components
+                LayoutInflater inflater = getLayoutInflater();
+                View dialogLayout = inflater.inflate(R.layout.add_med, null);
+                final EditText medNameInput = dialogLayout.findViewById(R.id.medNameInput);
+                Button btnGet = dialogLayout.findViewById(R.id.btnGet);
+                final TextView tvName = dialogLayout.findViewById(R.id.tvName);
+                final TextView tvDescrip = dialogLayout.findViewById(R.id.tvDescription);
+                final EditText etTime = dialogLayout.findViewById(R.id.etTime);
+                final EditText etQty = dialogLayout.findViewById(R.id.etQty);
+                final ImageView ivImage = dialogLayout.findViewById(R.id.ivImage);
+
+
+                // get info from api
+                btnGet.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(View v) {
                         // get med name and send to api
                         String medName = medNameInput.getText().toString();
 
@@ -83,13 +103,68 @@ public class MainActivity extends AppCompatActivity
                         }
 
                         if(medication != null) {
-                            Snackbar.make(view, medication.getDescription(), Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
+
+                            // populate name and description fields
+                            tvName.setText(medication.getName());
+                            tvDescrip.setText(medication.getDescription());
+
+                            // load image
+                            new DownloadImageTask(ivImage).execute(medication.getImageUrl());
                         }
 
                     }
                 });
 
+                // show time picker
+                etTime.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Calendar mcurrentTime = Calendar.getInstance();
+                        int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                        int minute = mcurrentTime.get(Calendar.MINUTE);
+                        TimePickerDialog mTimePicker;
+                        mTimePicker = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                                SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+                                Calendar calendar = Calendar.getInstance();
+                                calendar.set(Calendar.HOUR_OF_DAY, selectedHour);
+                                calendar.set(Calendar.MINUTE, selectedMinute);
+                                etTime.setText(timeFormat.format(calendar.getTime()));
+                            }
+                        }, hour, minute, false);
+                        mTimePicker.setTitle("Select Time");
+                        mTimePicker.show();
+                    }
+                });
+
+
+                builder.setPositiveButton(R.string.add_medication, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // get form data
+                        Medication medication = new Medication();
+                        medication.setName(tvName.getText().toString());
+                        medication.setDescription(tvDescrip.getText().toString());
+
+                        ScheduledEvent event = new ScheduledEvent();
+                        event.setQty(Double.parseDouble(etQty.getText().toString()));
+                        event.setTime(etTime.getText().toString());
+                        event.setMedication(medication);
+
+                        //TODO: Save event
+
+                    }
+                });
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Cancel
+                        dialog.cancel();
+                    }
+                });
+                builder.setView(dialogLayout);
                 builder.create().show();
             }
        });
