@@ -21,8 +21,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -67,11 +70,19 @@ public class MainActivity extends AppCompatActivity
         sqLiteHelper = new SQLiteHelper(getApplicationContext());
         mockdata.addAll(sqLiteHelper.getSchduledEvents());
         final EventsAdapter adapter = new EventsAdapter(this, mockdata);
-        ListView listView = findViewById(R.id.testLv);
+        final ListView listView = findViewById(R.id.testLv);
         View header = (View) getLayoutInflater().inflate(R.layout.scheduled_meds, null);
         listView.addHeaderView(header);
         listView.setAdapter(adapter);
+        listView.setLongClickable(true);
 
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                return false;
+            }
+
+        });
 
         final SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
 
@@ -79,14 +90,6 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-
-                /* Barcode scan
-
-                Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
-                intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
-                intent.putExtra(BarcodeCaptureActivity.UseFlash, true);
-                startActivityForResult(intent, RC_BARCODE_CAPTURE);
-                 */
 
                 // add medication
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -98,6 +101,7 @@ public class MainActivity extends AppCompatActivity
                 View dialogLayout = inflater.inflate(R.layout.add_med, null);
                 final TextInputEditText medNameInput = dialogLayout.findViewById(R.id.medNameInput);
                 Button btnGet = dialogLayout.findViewById(R.id.btnGet);
+                final ImageButton btnScan = dialogLayout.findViewById(R.id.btScan);
                 final TextInputEditText tvName = dialogLayout.findViewById(R.id.tvName);
                 final TextInputEditText tvDescrip = dialogLayout.findViewById(R.id.tvDescription);
                 final TextInputEditText etTime = dialogLayout.findViewById(R.id.etTime);
@@ -126,6 +130,7 @@ public class MainActivity extends AppCompatActivity
 
                         if(medication != null) {
 
+                            btnScan.setEnabled(false);
                             // populate name and description fields
                             tvName.setText(medication.getName());
                             tvDescrip.setText(medication.getDescription());
@@ -137,6 +142,15 @@ public class MainActivity extends AppCompatActivity
                             new DownloadImageTask(ivImage).execute(medication.getImageUrl());
                         }
 
+                    }
+                });
+                btnScan.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
+                        intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
+                        intent.putExtra(BarcodeCaptureActivity.UseFlash, true);
+                        startActivityForResult(intent, RC_BARCODE_CAPTURE);
                     }
                 });
 

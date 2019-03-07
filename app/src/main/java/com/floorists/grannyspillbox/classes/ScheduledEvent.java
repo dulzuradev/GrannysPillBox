@@ -81,11 +81,8 @@ public class ScheduledEvent {
     public static ArrayList<ScheduledEvent> getMockData() {
         ArrayList<ScheduledEvent> mockData = new ArrayList<>();
 
-        mockData.add(new ScheduledEvent(1,  2.0, new Date(2019, 1, 1, 0, 0, 0), 1, null, false));
+//        mockData.add(new ScheduledEvent(1,  2.0, new Date(2019, 1, 1, 0, 0, 0), 1, null, false));
         mockData.add(new ScheduledEvent(2,  2, new Date(2019, 2, 1, 0, 0, 0), 1, null, true));
-        mockData.add(new ScheduledEvent(3,  20.1, new Date(), 2, null, false));
-        mockData.add(new ScheduledEvent(4,  8.6, new Date(2019, 12, 1, 0, 0, 0), 3, null, false));
-        mockData.add(new ScheduledEvent(5,  3.7, new Date(2018, 12, 9, 0, 0, 0), 4, null, false));
 
         return mockData;
     }

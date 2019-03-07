@@ -26,6 +26,19 @@
 
     </LinearLayout>
 
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dp"
+        android:paddingTop="5dp"
+        android:paddingRight="10dp"
+        android:src="@drawable/ic_barcode_scan_black_18dp"
+        android:background="@null"
+        android:layout_gravity="right"
+        android:foregroundGravity="right"
+        android:id="@+id/btScan"/>
+
     <LinearLayout
         android:id="@+id/llForm"
         android:layout_width="match_parent"
