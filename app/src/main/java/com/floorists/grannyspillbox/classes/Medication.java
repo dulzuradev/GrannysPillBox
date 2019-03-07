@@ -8,6 +8,7 @@ public class Medication {
     public String serialNo;
     public String uom;
     public String imageUrl;
+    public double qty;
 
 
     public long getId() {
@@ -59,6 +60,13 @@ public class Medication {
         return imageUrl;
     }
 
+    public double getQty() {
+        return qty;
+    }
+
+    public void setQty(double qty) {
+        this.qty = qty;
+    }
 }
 
 

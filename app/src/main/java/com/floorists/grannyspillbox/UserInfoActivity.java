@@ -23,7 +23,7 @@ public class UserInfoActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_info);
-        
+        sqlhelper = new SQLiteHelper(getApplicationContext());
         User user = sqlhelper.getUser(1);
 
         userfirstEditText = (EditText) findViewById(R.id.userFist);
@@ -50,6 +50,8 @@ public class UserInfoActivity extends Activity {
                 emergencyFirstEditText.setText(user.getEmergencyContact().getFirstName());
                 emergencyLastEditText.setText(user.getEmergencyContact().getLastName());
                 emergencyPhoneEditText.setText(user.getEmergencyContact().getPhone());
+            } else {
+                user.setEmergencyContact(sqlhelper.getUser(2));
             }
 
         }

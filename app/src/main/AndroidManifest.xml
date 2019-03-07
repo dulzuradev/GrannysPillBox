@@ -24,6 +24,9 @@
             android:name=".utilities.BarcodeCaptureActivity"
             android:parentActivityName=".MainActivity">
         </activity>
+        <activity android:name=".UserInfoActivity">
+
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

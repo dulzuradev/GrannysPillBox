@@ -24,6 +24,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -32,6 +34,7 @@ import com.floorists.grannyspillbox.classes.Medication;
 import com.floorists.grannyspillbox.classes.ScheduledEvent;
 import com.floorists.grannyspillbox.utilities.BarcodeCaptureActivity;
 import com.floorists.grannyspillbox.utilities.DownloadImageTask;
+import com.floorists.grannyspillbox.utilities.SQLiteHelper;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
@@ -50,6 +53,8 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MAINACTIVITY";
     private TableLayout eventTable;
     private ArrayList<ScheduledEvent> mockdata = ScheduledEvent.getMockData();
+    public int index = 0;
+    private SQLiteHelper sqLiteHelper;
 
 
     @Override
@@ -58,10 +63,15 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        eventTable = (TableLayout)findViewById(R.id.eventTable);
-        for(int i=0; i<mockdata.size(); i++) {
-            insertEvent(mockdata.get(i), i+1);
-        }
+
+        sqLiteHelper = new SQLiteHelper(getApplicationContext());
+        mockdata.addAll(sqLiteHelper.getSchduledEvents());
+        final EventsAdapter adapter = new EventsAdapter(this, mockdata);
+        ListView listView = findViewById(R.id.testLv);
+        View header = (View) getLayoutInflater().inflate(R.layout.scheduled_meds, null);
+        listView.addHeaderView(header);
+        listView.setAdapter(adapter);
+
 
         final SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
 
@@ -93,6 +103,7 @@ public class MainActivity extends AppCompatActivity
                 final TextInputEditText etTime = dialogLayout.findViewById(R.id.etTime);
                 final TextInputEditText etQty = dialogLayout.findViewById(R.id.etQty);
                 final ImageView ivImage = dialogLayout.findViewById(R.id.ivImage);
+                final LinearLayout llForm = dialogLayout.findViewById(R.id.llForm);
 
                 // get info from api
                 btnGet.setOnClickListener(new View.OnClickListener() {
@@ -118,6 +129,9 @@ public class MainActivity extends AppCompatActivity
                             // populate name and description fields
                             tvName.setText(medication.getName());
                             tvDescrip.setText(medication.getDescription());
+
+                            // show form section
+                            llForm.setVisibility(View.VISIBLE);
 
                             // load image
                             new DownloadImageTask(ivImage).execute(medication.getImageUrl());
@@ -167,6 +181,10 @@ public class MainActivity extends AppCompatActivity
                         }
 
                         //TODO: Save event
+                        event.setMedicationID(sqLiteHelper.addMedication(medication));
+                        sqLiteHelper.addScheduledEvent(event);
+                        mockdata.add(event);
+                        adapter.notifyDataSetChanged();
 
                     }
                 });
@@ -179,6 +197,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
                 builder.setView(dialogLayout);
+
                 builder.create().show();
             }
        });
