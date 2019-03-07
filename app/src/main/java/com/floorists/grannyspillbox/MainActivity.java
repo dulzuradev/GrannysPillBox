@@ -3,6 +3,7 @@ package com.floorists.grannyspillbox;
 
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +25,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.TableLayout;
+import android.widget.TextView;
+
 
 import com.floorists.grannyspillbox.classes.Medication;
 import com.floorists.grannyspillbox.classes.ScheduledEvent;
@@ -34,7 +40,9 @@ import com.google.android.gms.vision.barcode.Barcode;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -44,6 +52,9 @@ public class MainActivity extends AppCompatActivity
 
     private static final int RC_BARCODE_CAPTURE = 9001;
     private static final String TAG = "MAINACTIVITY";
+    private TableLayout eventTable;
+    private ArrayList<ScheduledEvent> mockdata = ScheduledEvent.getMockData();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +62,12 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        eventTable = (TableLayout)findViewById(R.id.eventTable);
+        for(int i=0; i<mockdata.size(); i++) {
+            insertEvent(mockdata.get(i), i+1);
+        }
 
+        final SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -126,7 +142,6 @@ public class MainActivity extends AppCompatActivity
                         mTimePicker = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                                SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
                                 Calendar calendar = Calendar.getInstance();
                                 calendar.set(Calendar.HOUR_OF_DAY, selectedHour);
                                 calendar.set(Calendar.MINUTE, selectedMinute);
@@ -149,8 +164,12 @@ public class MainActivity extends AppCompatActivity
 
                         ScheduledEvent event = new ScheduledEvent();
                         event.setQty(Double.parseDouble(etQty.getText().toString()));
-                        event.setTime(etTime.getText().toString());
                         event.setMedication(medication);
+                        try{
+                            event.setTime(timeFormat.parse(etTime.getText().toString()));
+                        } catch(Exception e) {
+                            Log.i("setTime", "event.setTime() failed");
+                        }
 
                         //TODO: Save event
 
@@ -256,4 +275,25 @@ public class MainActivity extends AppCompatActivity
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+     private void insertEvent(ScheduledEvent event, int index) {
+         LayoutInflater inflator = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+         View newEvent = inflator.inflate(R.layout.scheduled_meds, null);
+         CheckBox completedBox = (CheckBox) newEvent.findViewById(R.id.completedCheckBox);
+         TextView medNameTextView = (TextView) newEvent.findViewById(R.id.pillNameTextView);
+         TextView timeTextView = (TextView) newEvent.findViewById(R.id.timeTextView);
+         TextView qtyTextView = (TextView) newEvent.findViewById(R.id.qtyTextView);
+
+         if(event.medication != null) {
+             medNameTextView.setText(event.medication.getName());
+         } else {
+             medNameTextView.setText("Advil");
+         }
+
+         completedBox.setChecked(event.isCompleted());
+
+         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+         timeTextView.setText(sdf.format(event.getTime()));
+         qtyTextView.setText(String.valueOf(event.getQty()));
+         eventTable.addView(newEvent, index);
+     }
 }
