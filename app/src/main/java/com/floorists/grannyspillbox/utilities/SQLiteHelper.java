@@ -33,10 +33,15 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String MED_QTY = "qty";
     private static final String MED_DATE = "date";
     private static final String MED_UOM = "uom";
+    private static final String HIST_ID = "id";
+    private static final String HIST_MED_ID = "medication_id";
+    private static final String HIST_COMPLETED = "completed";
+    private static final String HIST_QTY = "qty";
+    private static final String HIST_DATE = "date";
 
     private static final String[] MED_COLUMNS = { MED_ID, MED_NAME, MED_DESC, MED_SERIAL, MED_QTY, MED_DATE, MED_UOM };
-    private static final String[] HIST_COLUMNS = { MED_ID, MED_NAME, MED_DESC, MED_SERIAL, MED_QTY, MED_DATE, MED_UOM };
-
+    private static final String[] HIST_COLUMNS = { HIST_ID, HIST_MED_ID, HIST_COMPLETED, HIST_QTY, HIST_DATE};
+    private static final String[] SCHED_EVENT_COLUMNS = HIST_COLUMNS;
     public SQLiteHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
@@ -65,20 +70,26 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 + "name TEXT, "
                 + "description TEXT, "
                 + "serialNo TEXT, "
-                + "qty REAL, "
-                + "date TEXT, "
                 + "uom TEXT )";
         db.execSQL(CREATE_MEDICATION_TABLE);
 
         String CREATE_HISTORY_TABLE = "CREATE TABLE history ( "
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "name TEXT, "
-                + "description TEXT, "
-                + "serialNo TEXT, "
+                + "medication_id INTEGER, "
+                + "completed INTEGER, "
                 + "qty REAL, "
                 + "date TEXT, "
-                + "uom TEXT )";
+                + "FOREIGN KEY(medication_id) REFERENCES medication(id))";
         db.execSQL(CREATE_HISTORY_TABLE);
+
+        String CREATE_SCHEDULED_EVENT_TABLE = "CREATE TABLE scheduled_event ( "
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "medication_id INTEGER, "
+                + "completed INTEGER, "
+                + "qty REAL, "
+                + "date TEXT, "
+                + "FOREIGN KEY(medication_id) REFERENCES medication(id))";
+        db.execSQL(CREATE_SCHEDULED_EVENT_TABLE);
     }
 
     @Override
@@ -95,9 +106,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         values.put(MED_NAME, medication.getName());
         values.put(MED_DESC, medication.getDescription());
         values.put(MED_SERIAL, medication.getSerialNo());
-        values.put(MED_DATE, String.valueOf(medication.getDate()));
         values.put(MED_UOM, medication.getUom());
-        values.put(MED_QTY, medication.getQty());
         //insert
         db.insert(TABLE_MEDICATION, null, values);
         //close after transaction
@@ -117,9 +126,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         medication.setName(cursor.getString(1));
         medication.setDescription(cursor.getString(2));
         medication.setSerialNo(cursor.getString(3));
-        medication.setDate(convertStringToDate(cursor.getString(4)));
         medication.setUom(cursor.getString(5));
-        medication.setQty(cursor.getDouble(6));
 
         return medication;
     }
@@ -139,13 +146,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 medication.setName(cursor.getString(1));
                 medication.setDescription(cursor.getString(2));
                 medication.setSerialNo(cursor.getString(3));
-                medication.setDate(convertStringToDate(cursor.getString(4)));
                 medication.setUom(cursor.getString(5));
-                try {
-                    medication.setQty(cursor.getDouble(6));
-                } catch (IllegalStateException ex) {
-                    medication.setQty(0);
-                }
+
 
                 medList.add(medication);
             } while (cursor.moveToNext());
@@ -157,12 +159,12 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         //make values
         ContentValues values = new ContentValues();
-        values.put(MED_NAME, record.getName());
-        values.put(MED_DESC, record.getDescription());
-        values.put(MED_SERIAL, record.getSerialNo());
-        values.put(MED_DATE, String.valueOf(record.getDate()));
-        values.put(MED_UOM, record.getUom());
-        values.put(MED_QTY, record.getQty());
+
+
+        values.put(HIST_MED_ID, record.getMedicationID());
+        values.put(HIST_QTY, record.getQty());
+        values.put(HIST_COMPLETED, record.isCompleted());
+        values.put(HIST_DATE, String.valueOf(record.getTime()));
         //insert
         db.insert(TABLE_HISTORY, null, values);
         //close after transaction
@@ -181,16 +183,11 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             do {
                 record = new History();
                 record.setId(Integer.parseInt(cursor.getString(0)));
-                record.setName(cursor.getString(1));
-                record.setDescription(cursor.getString(2));
-                record.setSerialNo(cursor.getString(3));
-                record.setDate(convertStringToDate(cursor.getString(4)));
-                record.setUom(cursor.getString(5));
-                try {
-                    record.setQty(cursor.getDouble(6));
-                } catch (IllegalStateException ex) {
-                    record.setQty(0);
-                }
+                record.setMedicationID(Integer.parseInt(cursor.getString(1)));
+                record.setCompleted(Integer.parseInt(cursor.getString(2)) != 0);
+                record.setQty(cursor.getDouble(3));
+                record.setTime(convertStringToDate(cursor.getString(4)));
+
 
                 histList.add(record);
             } while (cursor.moveToNext());
@@ -211,16 +208,11 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             do {
                 record = new History();
                 record.setId(Integer.parseInt(cursor.getString(0)));
-                record.setName(cursor.getString(1));
-                record.setDescription(cursor.getString(2));
-                record.setSerialNo(cursor.getString(3));
-                record.setDate(convertStringToDate(cursor.getString(4)));
-                record.setUom(cursor.getString(5));
-                try {
-                    record.setQty(cursor.getDouble(6));
-                } catch (IllegalStateException ex) {
-                    record.setQty(0);
-                }
+                record.setMedicationID(Integer.parseInt(cursor.getString(1)));
+                record.setCompleted(Integer.parseInt(cursor.getString(2)) != 0);
+                record.setQty(cursor.getDouble(3));
+                record.setTime(convertStringToDate(cursor.getString(4)));
+
 
                 histList.add(record);
             } while (cursor.moveToNext());

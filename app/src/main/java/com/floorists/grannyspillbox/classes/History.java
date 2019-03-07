@@ -5,12 +5,19 @@ import com.floorists.grannyspillbox.Medication;
 import java.util.Date;
 
 public class History {
+    public int id;
     public double qty;
-    public String time;
+    public Date time;
     public int medicationID;
     public Medication medication;
     public boolean completed;
 
+    public int getId(){
+        return id;
+    }
+    public void setId(int id){
+        this.id = id;
+    }
 
     public double getQty() {
         return qty;
@@ -20,11 +27,11 @@ public class History {
         this.qty = qty;
     }
 
-    public String getTime() {
+    public Date getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(Date time) {
         this.time = time;
     }
 

@@ -4,12 +4,19 @@ import com.floorists.grannyspillbox.Medication;
 
 public class ScheduledEvent {
 
+    public int id;
     public double qty;
     public String time;
     public int medicationID;
     public Medication medication;
     public boolean completed;
 
+    public int getId(){
+        return id;
+    }
+    public void setId() {
+        this.id = id;
+    }
     public int getMedicationID() {
         return medicationID;
     }
