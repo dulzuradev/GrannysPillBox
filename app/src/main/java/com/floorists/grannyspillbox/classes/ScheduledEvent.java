@@ -2,14 +2,31 @@ package com.floorists.grannyspillbox.classes;
 
 import com.floorists.grannyspillbox.Medication;
 
-import java.util.Date;
+public class ScheduledEvent {
 
-public class History {
     public double qty;
     public String time;
     public int medicationID;
     public Medication medication;
     public boolean completed;
+
+    public int getMedicationID() {
+        return medicationID;
+    }
+
+    public void setMedicationID(int medicationID) {
+        this.medicationID = medicationID;
+    }
+
+
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
 
 
     public double getQty() {
@@ -28,27 +45,15 @@ public class History {
         this.time = time;
     }
 
-    public int getMedicationID() {
-        return medicationID;
-    }
-
-    public void setMedicationID(int medicationID) {
-        this.medicationID = medicationID;
-    }
-
     public Medication getMedication() {
+        if(medication == null) {
+            medication = new Medication();
+            medication.id = medicationID;
+        }
         return medication;
     }
 
     public void setMedication(Medication medication) {
         this.medication = medication;
-    }
-
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
     }
 }
