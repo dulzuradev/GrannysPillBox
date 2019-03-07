@@ -1,11 +1,9 @@
 package com.floorists.grannyspillbox;
-
 import android.util.Log;
-
+import com.floorists.grannyspillbox.classes.Medication;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,11 +18,13 @@ import java.util.concurrent.Future;
 
 public class FDATransport {
 
-    public static Future<String> getMedInfo(final String medName) {
+    public static Future<Medication> getMedInfo(final String medName) {
+
+
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Callable<String> callable = new Callable<String>() {
+        Callable<Medication> callable = new Callable<Medication>() {
             @Override
-            public String call() throws Exception {
+            public Medication call() throws Exception {
                 try {
                     URL url = new URL("https://api.fda.gov/drug/ndc.json?search=generic_name:" + medName);
                     URLConnection urlConnection = url.openConnection();
@@ -34,9 +34,15 @@ public class FDATransport {
                     JSONArray results = json.getJSONArray("results");
                     JSONArray packageInfo = results.getJSONObject(0).getJSONArray("packaging");
                     String description = packageInfo.getJSONObject(0).get("description").toString();
+                    String name = results.getJSONObject(0).get("generic_name").toString();
+                    String imageUrl = getImageUrl(medName);
 
+                    Medication med = new Medication();
+                    med.setDescription(description);
+                    med.setImageUrl(imageUrl);
+                    med.setName(name);
 
-                    return description;
+                    return med;
 
                 } catch(IOException | JSONException e) {
                     Log.e("getMedInfo", "request failed", e);
@@ -46,9 +52,24 @@ public class FDATransport {
 
         };
 
-        Future<String> future = executor.submit(callable);
+        Future<Medication> future = executor.submit(callable);
         executor.shutdown();
         return future;
+    }
+
+
+    public static String getImageUrl(String medName) {
+
+        try {
+            URL url = new URL("https://rximage.nlm.nih.gov/api/rximage/1/rxnav?name=" + medName);
+            URLConnection urlConnection = url.openConnection();
+            InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+            JSONObject json = getJsonObject(is).getJSONArray("nlmRxImages").getJSONObject(0);
+            return json.get("imageUrl").toString();
+        } catch (Exception e) {
+            Log.e("getImageUrl", "request failed", e);
+            return null;
+        }
     }
 
     //Returns a json object from an input stream

@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import com.floorists.grannyspillbox.classes.Medication;
 import com.floorists.grannyspillbox.utilities.BarcodeCaptureActivity;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
@@ -69,20 +70,20 @@ public class MainActivity extends AppCompatActivity
                         // get med name and send to api
                         String medName = medNameInput.getText().toString();
 
-                        String description;
+                        Medication medication;
 
                         try {
-                            Future<String> future =  FDATransport.getMedInfo(medName);
+                            Future<Medication> future =  FDATransport.getMedInfo(medName);
                             while(!future.isDone()) { }
 
-                            description = future.get();
+                            medication = future.get();
                         } catch (InterruptedException | ExecutionException e) {
                             e.printStackTrace();
-                            description = null;
+                            medication = null;
                         }
 
-                        if(description != null) {
-                            Snackbar.make(view, description, Snackbar.LENGTH_LONG)
+                        if(medication != null) {
+                            Snackbar.make(view, medication.getDescription(), Snackbar.LENGTH_LONG)
                                     .setAction("Action", null).show();
                         }
 
