@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,15 +22,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.CheckBox;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TextView;
-
+import android.widget.TimePicker;
 
 import com.floorists.grannyspillbox.classes.Medication;
 import com.floorists.grannyspillbox.classes.ScheduledEvent;
@@ -39,10 +36,9 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -90,14 +86,13 @@ public class MainActivity extends AppCompatActivity
                 // Layout components
                 LayoutInflater inflater = getLayoutInflater();
                 View dialogLayout = inflater.inflate(R.layout.add_med, null);
-                final EditText medNameInput = dialogLayout.findViewById(R.id.medNameInput);
+                final TextInputEditText medNameInput = dialogLayout.findViewById(R.id.medNameInput);
                 Button btnGet = dialogLayout.findViewById(R.id.btnGet);
-                final TextView tvName = dialogLayout.findViewById(R.id.tvName);
-                final TextView tvDescrip = dialogLayout.findViewById(R.id.tvDescription);
-                final EditText etTime = dialogLayout.findViewById(R.id.etTime);
-                final EditText etQty = dialogLayout.findViewById(R.id.etQty);
+                final TextInputEditText tvName = dialogLayout.findViewById(R.id.tvName);
+                final TextInputEditText tvDescrip = dialogLayout.findViewById(R.id.tvDescription);
+                final TextInputEditText etTime = dialogLayout.findViewById(R.id.etTime);
+                final TextInputEditText etQty = dialogLayout.findViewById(R.id.etQty);
                 final ImageView ivImage = dialogLayout.findViewById(R.id.ivImage);
-
 
                 // get info from api
                 btnGet.setOnClickListener(new View.OnClickListener() {
