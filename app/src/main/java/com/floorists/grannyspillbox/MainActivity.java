@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MAINACTIVITY";
     private TableLayout eventTable;
     private ArrayList<ScheduledEvent> mockdata = ScheduledEvent.getMockData();
+    public int index = 0;
 
 
     @Override
@@ -58,10 +60,14 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        eventTable = (TableLayout)findViewById(R.id.eventTable);
+        /*eventTable = (TableLayout)findViewById(R.id.eventTable);
         for(int i=0; i<mockdata.size(); i++) {
             insertEvent(mockdata.get(i), i+1);
-        }
+        } */
+
+        final EventsAdapter adapter = new EventsAdapter(this, mockdata);
+        ListView listView = findViewById(R.id.testLv);
+        listView.setAdapter(adapter);
 
         final SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
 
@@ -167,6 +173,8 @@ public class MainActivity extends AppCompatActivity
                         }
 
                         //TODO: Save event
+                        mockdata.add(event);
+                        adapter.notifyDataSetChanged();
 
                     }
                 });
