@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -102,6 +103,7 @@ public class MainActivity extends AppCompatActivity
                 final TextInputEditText etTime = dialogLayout.findViewById(R.id.etTime);
                 final TextInputEditText etQty = dialogLayout.findViewById(R.id.etQty);
                 final ImageView ivImage = dialogLayout.findViewById(R.id.ivImage);
+                final LinearLayout llForm = dialogLayout.findViewById(R.id.llForm);
 
                 // get info from api
                 btnGet.setOnClickListener(new View.OnClickListener() {
@@ -127,6 +129,9 @@ public class MainActivity extends AppCompatActivity
                             // populate name and description fields
                             tvName.setText(medication.getName());
                             tvDescrip.setText(medication.getDescription());
+
+                            // show form section
+                            llForm.setVisibility(View.VISIBLE);
 
                             // load image
                             new DownloadImageTask(ivImage).execute(medication.getImageUrl());
@@ -190,6 +195,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
                 builder.setView(dialogLayout);
+
                 builder.create().show();
             }
        });
