@@ -2,6 +2,7 @@ package com.floorists.grannyspillbox;
 
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,16 +17,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TableLayout;
+import android.widget.TextView;
 
 import com.floorists.grannyspillbox.classes.Medication;
+import com.floorists.grannyspillbox.classes.ScheduledEvent;
 import com.floorists.grannyspillbox.utilities.BarcodeCaptureActivity;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -35,6 +43,9 @@ public class MainActivity extends AppCompatActivity
 
     private static final int RC_BARCODE_CAPTURE = 9001;
     private static final String TAG = "MAINACTIVITY";
+    private TableLayout eventTable;
+    private ArrayList<ScheduledEvent> mockdata = ScheduledEvent.getMockData();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +53,10 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        eventTable = (TableLayout)findViewById(R.id.eventTable);
+        for(int i=0; i<mockdata.size(); i++) {
+            insertEvent(mockdata.get(i), i+1);
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -181,4 +196,25 @@ public class MainActivity extends AppCompatActivity
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+     private void insertEvent(ScheduledEvent event, int index) {
+         LayoutInflater inflator = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+         View newEvent = inflator.inflate(R.layout.scheduled_meds, null);
+         CheckBox completedBox = (CheckBox) newEvent.findViewById(R.id.completedCheckBox);
+         TextView medNameTextView = (TextView) newEvent.findViewById(R.id.pillNameTextView);
+         TextView timeTextView = (TextView) newEvent.findViewById(R.id.timeTextView);
+         TextView qtyTextView = (TextView) newEvent.findViewById(R.id.qtyTextView);
+
+         if(event.medication != null) {
+             medNameTextView.setText(event.medication.getName());
+         } else {
+             medNameTextView.setText("Advil");
+         }
+
+         completedBox.setChecked(event.isCompleted());
+
+         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+         timeTextView.setText(sdf.format(event.getTime()));
+         qtyTextView.setText(String.valueOf(event.getQty()));
+         eventTable.addView(newEvent, index);
+     }
 }

@@ -78,7 +78,7 @@ public class ScheduledEvent {
     }
 
     @SuppressWarnings("deprecation")
-    public ArrayList<ScheduledEvent> getMockData() {
+    public static ArrayList<ScheduledEvent> getMockData() {
         ArrayList<ScheduledEvent> mockData = new ArrayList<>();
 
         mockData.add(new ScheduledEvent(1,  2.0, new Date(2019, 1, 1, 0, 0, 0), 1, null, false));
