@@ -1,47 +1,16 @@
 package com.floorists.grannyspillbox.classes;
 
+import com.floorists.grannyspillbox.Medication;
+
 import java.util.Date;
 
 public class History {
-    public long id;
-    public String name;
-    public String description;
-    public String serialNo;
     public double qty;
-    public String uom;
-    public Date date;
+    public String time;
+    public int medicationID;
+    public Medication medication;
+    public boolean completed;
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getSerialNo() {
-        return serialNo;
-    }
-
-    public void setSerialNo(String serialNo) {
-        this.serialNo = serialNo;
-    }
 
     public double getQty() {
         return qty;
@@ -51,19 +20,35 @@ public class History {
         this.qty = qty;
     }
 
-    public String getUom() {
-        return uom;
+    public String getTime() {
+        return time;
     }
 
-    public void setUom(String uom) {
-        this.uom = uom;
+    public void setTime(String time) {
+        this.time = time;
     }
 
-    public Date getDate() {
-        return date;
+    public int getMedicationID() {
+        return medicationID;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setMedicationID(int medicationID) {
+        this.medicationID = medicationID;
+    }
+
+    public Medication getMedication() {
+        return medication;
+    }
+
+    public void setMedication(Medication medication) {
+        this.medication = medication;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 }
