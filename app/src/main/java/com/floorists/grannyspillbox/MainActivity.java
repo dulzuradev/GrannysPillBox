@@ -1,17 +1,24 @@
 package com.floorists.grannyspillbox;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -26,9 +33,42 @@ public class MainActivity extends AppCompatActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onClick(final View view) {
+                // add medication
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Add Medication");
+
+                final EditText medNameInput = new EditText(MainActivity.this);
+                medNameInput.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(medNameInput);
+
+                builder.setPositiveButton("ADD", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // get med name and send to api
+                        String medName = medNameInput.getText().toString();
+
+                        String description;
+
+                        try {
+                            Future<String> future =  FDATransport.getMedInfo(medName);
+                            while(!future.isDone()) { }
+
+                            description = future.get();
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                            description = null;
+                        }
+
+                        if(description != null) {
+                            Snackbar.make(view, description, Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+
+                    }
+                });
+
+                builder.create().show();
             }
         });
 
