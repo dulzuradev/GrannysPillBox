@@ -1,25 +1,33 @@
 package com.floorists.grannyspillbox;
 
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 
 import com.floorists.grannyspillbox.utilities.BarcodeCaptureActivity;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -37,13 +45,53 @@ public class MainActivity extends AppCompatActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
+
+                /* Barcode scan
+
                 Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
                 intent.putExtra(BarcodeCaptureActivity.AutoFocus, true);
                 intent.putExtra(BarcodeCaptureActivity.UseFlash, true);
                 startActivityForResult(intent, RC_BARCODE_CAPTURE);
+                 */
+
+                // add medication
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Add Medication");
+
+                final EditText medNameInput = new EditText(MainActivity.this);
+                medNameInput.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(medNameInput);
+
+                builder.setPositiveButton("ADD", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // get med name and send to api
+                        String medName = medNameInput.getText().toString();
+
+                        String description;
+
+                        try {
+                            Future<String> future =  FDATransport.getMedInfo(medName);
+                            while(!future.isDone()) { }
+
+                            description = future.get();
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                            description = null;
+                        }
+
+                        if(description != null) {
+                            Snackbar.make(view, description, Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+
+                    }
+                });
+
+                builder.create().show();
             }
-        });
+       });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
