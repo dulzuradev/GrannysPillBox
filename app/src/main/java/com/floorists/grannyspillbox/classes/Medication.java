@@ -1,6 +1,4 @@
-package com.floorists.grannyspillbox;
-
-import java.util.Date;
+package com.floorists.grannyspillbox.classes;
 
 public class Medication {
 
@@ -9,6 +7,8 @@ public class Medication {
     public String description;
     public String serialNo;
     public String uom;
+    public String imageUrl;
+
 
     public long getId() {
         return id;
@@ -51,4 +51,14 @@ public class Medication {
         this.uom = uom;
     }
 
+    public void setImageUrl(String url) {
+        this.imageUrl = url;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
 }
+
+
