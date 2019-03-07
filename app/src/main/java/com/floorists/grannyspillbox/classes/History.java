@@ -1,9 +1,5 @@
 package com.floorists.grannyspillbox.classes;
 
-import com.floorists.grannyspillbox.Medication;
-
-import java.util.Date;
-
 public class History {
     public double qty;
     public String time;

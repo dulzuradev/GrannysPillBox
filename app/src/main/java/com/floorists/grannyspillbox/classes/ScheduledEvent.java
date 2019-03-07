@@ -1,7 +1,5 @@
 package com.floorists.grannyspillbox.classes;
 
-import com.floorists.grannyspillbox.Medication;
-
 public class ScheduledEvent {
 
     public double qty;

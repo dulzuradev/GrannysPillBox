@@ -1,7 +1,5 @@
 package com.floorists.grannyspillbox.classes;
 
-import java.util.Date;
-
 public class Medication {
 
     public long id;
@@ -53,8 +51,14 @@ public class Medication {
         this.uom = uom;
     }
 
-    public void setImageUrl(String url) { this.imageUrl = url; }
+    public void setImageUrl(String url) {
+        this.imageUrl = url;
+    }
 
-    public String getImageUrl() { return imageUrl; }
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+}
 
 

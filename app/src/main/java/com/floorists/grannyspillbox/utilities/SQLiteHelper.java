@@ -6,8 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.floorists.grannyspillbox.Medication;
 import com.floorists.grannyspillbox.classes.History;
+import com.floorists.grannyspillbox.classes.Medication;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -95,9 +95,9 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         values.put(MED_NAME, medication.getName());
         values.put(MED_DESC, medication.getDescription());
         values.put(MED_SERIAL, medication.getSerialNo());
-        values.put(MED_DATE, String.valueOf(medication.getDate()));
+        //values.put(MED_DATE, String.valueOf(medication.getDate()));
         values.put(MED_UOM, medication.getUom());
-        values.put(MED_QTY, medication.getQty());
+        //values.put(MED_QTY, medication.getQty());
         //insert
         db.insert(TABLE_MEDICATION, null, values);
         //close after transaction
@@ -117,9 +117,9 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         medication.setName(cursor.getString(1));
         medication.setDescription(cursor.getString(2));
         medication.setSerialNo(cursor.getString(3));
-        medication.setDate(convertStringToDate(cursor.getString(4)));
+        //medication.setDate(convertStringToDate(cursor.getString(4)));
         medication.setUom(cursor.getString(5));
-        medication.setQty(cursor.getDouble(6));
+       // medication.setQty(cursor.getDouble(6));
 
         return medication;
     }
@@ -139,13 +139,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 medication.setName(cursor.getString(1));
                 medication.setDescription(cursor.getString(2));
                 medication.setSerialNo(cursor.getString(3));
-                medication.setDate(convertStringToDate(cursor.getString(4)));
+                //medication.setDate(convertStringToDate(cursor.getString(4)));
                 medication.setUom(cursor.getString(5));
+                /*
                 try {
                     medication.setQty(cursor.getDouble(6));
                 } catch (IllegalStateException ex) {
                     medication.setQty(0);
-                }
+                } */
 
                 medList.add(medication);
             } while (cursor.moveToNext());
@@ -157,11 +158,11 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         //make values
         ContentValues values = new ContentValues();
-        values.put(MED_NAME, record.getName());
-        values.put(MED_DESC, record.getDescription());
-        values.put(MED_SERIAL, record.getSerialNo());
-        values.put(MED_DATE, String.valueOf(record.getDate()));
-        values.put(MED_UOM, record.getUom());
+        values.put(MED_NAME, record.medication.getName());
+        values.put(MED_DESC, record.medication.getDescription());
+        values.put(MED_SERIAL, record.medication.getSerialNo());
+       // values.put(MED_DATE, String.valueOf(record.medication.getDate()));
+        values.put(MED_UOM, record.medication.getUom());
         values.put(MED_QTY, record.getQty());
         //insert
         db.insert(TABLE_HISTORY, null, values);
@@ -180,12 +181,12 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 record = new History();
-                record.setId(Integer.parseInt(cursor.getString(0)));
-                record.setName(cursor.getString(1));
-                record.setDescription(cursor.getString(2));
-                record.setSerialNo(cursor.getString(3));
-                record.setDate(convertStringToDate(cursor.getString(4)));
-                record.setUom(cursor.getString(5));
+                record.medication.setId(Integer.parseInt(cursor.getString(0)));
+                record.medication.setName(cursor.getString(1));
+                record.medication.setDescription(cursor.getString(2));
+                record.medication.setSerialNo(cursor.getString(3));
+                //record.medication.setDate(convertStringToDate(cursor.getString(4)));
+                record.medication.setUom(cursor.getString(5));
                 try {
                     record.setQty(cursor.getDouble(6));
                 } catch (IllegalStateException ex) {
@@ -210,12 +211,12 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 record = new History();
-                record.setId(Integer.parseInt(cursor.getString(0)));
-                record.setName(cursor.getString(1));
-                record.setDescription(cursor.getString(2));
-                record.setSerialNo(cursor.getString(3));
-                record.setDate(convertStringToDate(cursor.getString(4)));
-                record.setUom(cursor.getString(5));
+                record.medication.setId(Integer.parseInt(cursor.getString(0)));
+                record.medication.setName(cursor.getString(1));
+                record.medication.setDescription(cursor.getString(2));
+                record.medication.setSerialNo(cursor.getString(3));
+                //record.medication.setDate(convertStringToDate(cursor.getString(4)));
+                record.medication.setUom(cursor.getString(5));
                 try {
                     record.setQty(cursor.getDouble(6));
                 } catch (IllegalStateException ex) {
