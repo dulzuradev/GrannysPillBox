@@ -20,32 +20,29 @@ import java.util.List;
 public class SQLiteHelper extends SQLiteOpenHelper {
 
     // database version
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 10;
     // database name
     private static final String DATABASE_NAME = "PillBoxDB";
     // table names
-    private static final String TABLE_MEDICATION = "medication";
-    private static final String TABLE_HISTORY = "history";
-    private static final String TABLE_SCHED_EVENT = "scheduled_event";
+    private static final String TABLE_MEDICATIONS = "medications";
+    private static final String TABLE_EVENTS = "events";
     // column names
     private static final String MED_ID = "id";
     private static final String MED_NAME = "name";
     private static final String MED_DESC = "description";
     private static final String MED_SERIAL = "serialNo";
     private static final String MED_QTY = "qty";
-    private static final String MED_DATE = "date";
     private static final String MED_UOM = "uom";
-    private static final String HIST_ID = "id";
-    private static final String HIST_MED_ID = "medication_id";
-    private static final String HIST_COMPLETED = "completed";
-    private static final String HIST_QTY = "qty";
-    private static final String HIST_DATE = "date";
+    private static final String EVENT_ID = "id";
+    private static final String EVENT_MED_ID = "med_id";
+    private static final String EVENT_COMPLETED = "completed";
+    private static final String EVENT_QTY = "qty";
+    private static final String EVENT_DATE = "date";
 
-    private static final String[] MED_COLUMNS = { MED_ID, MED_NAME, MED_DESC, MED_SERIAL, MED_QTY, MED_DATE, MED_UOM };
-    private static final String[] HIST_COLUMNS = { HIST_ID, HIST_MED_ID, HIST_COMPLETED, HIST_QTY, HIST_DATE};
-    private static final String[] SCHED_EVENT_COLUMNS = HIST_COLUMNS;
-    public SQLiteHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, factory, version);
+    private static final String[] MEDS_COLUMNS = { MED_ID, MED_NAME, MED_DESC, MED_SERIAL, MED_QTY, MED_UOM };
+    private static final String[] EVENTS_COLUMNS = { EVENT_ID, EVENT_MED_ID, EVENT_COMPLETED, EVENT_QTY, EVENT_DATE};
+    public SQLiteHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     private String getSimpleDate() {
@@ -67,61 +64,52 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String CREATE_MEDICATION_TABLE = "CREATE TABLE medication ( "
+        String CREATE_MEDICATIONS_TABLE = "CREATE TABLE IF NOT EXISTS medications ( "
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "name TEXT, "
                 + "description TEXT, "
                 + "serialNo TEXT, "
+                + "qty REAL, "
                 + "uom TEXT )";
-        db.execSQL(CREATE_MEDICATION_TABLE);
+        db.execSQL(CREATE_MEDICATIONS_TABLE);
 
-        String CREATE_HISTORY_TABLE = "CREATE TABLE history ( "
+        String CREATE_EVENTS_TABLE = "CREATE TABLE IF NOT EXISTS events ( "
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "medication_id INTEGER, "
+                + "med_id INTEGER, "
                 + "completed INTEGER, "
                 + "qty REAL, "
                 + "date TEXT, "
-                + "FOREIGN KEY(medication_id) REFERENCES medication(id))";
-        db.execSQL(CREATE_HISTORY_TABLE);
-
-        String CREATE_SCHEDULED_EVENT_TABLE = "CREATE TABLE scheduled_event ( "
-                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "medication_id INTEGER, "
-                + "completed INTEGER, "
-                + "qty REAL, "
-                + "date TEXT, "
-                + "FOREIGN KEY(medication_id) REFERENCES medication(id))";
-        db.execSQL(CREATE_SCHEDULED_EVENT_TABLE);
+                + "FOREIGN KEY(med_id) REFERENCES medication(id))";
+        db.execSQL(CREATE_EVENTS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS medication");
-        db.execSQL("DROP TABLE IF EXISTS history");
         db.execSQL("DROP TABLE IF EXISTS scheduled_event");
         this.onCreate(db);
     }
 
-    public void addMedication(Medication medication) {
+    public int addMedication(Medication medication) {
         SQLiteDatabase db = this.getWritableDatabase();
         //make values
         ContentValues values = new ContentValues();
         values.put(MED_NAME, medication.getName());
         values.put(MED_DESC, medication.getDescription());
         values.put(MED_SERIAL, medication.getSerialNo());
-        //values.put(MED_DATE, String.valueOf(medication.getDate()));
+        values.put(MED_QTY, medication.getQty());
         values.put(MED_UOM, medication.getUom());
-        //values.put(MED_QTY, medication.getQty());
         //insert
-        db.insert(TABLE_MEDICATION, null, values);
+        db.insert(TABLE_MEDICATIONS, null, values);
         //close after transaction
         db.close();
+        return (int) getMedicationByName(medication.name).id;
     }
 
-    public Medication getMedication(long id) {
+    public Medication getMedicationByName(String name) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_MEDICATION, MED_COLUMNS," id = ?", new String[] { String.valueOf(id) }, null, null, null, null);
+        Cursor cursor = db.query(TABLE_MEDICATIONS, MEDS_COLUMNS," name = ?", new String[] { String.valueOf(name) }, null, null, null, null);
         //if results != null, parse first
         if (cursor != null)
             cursor.moveToFirst();
@@ -131,10 +119,28 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         medication.setName(cursor.getString(1));
         medication.setDescription(cursor.getString(2));
         medication.setSerialNo(cursor.getString(3));
-        //medication.setDate(convertStringToDate(cursor.getString(4)));
+        medication.setQty(cursor.getDouble(4));
         medication.setUom(cursor.getString(5));
-       // medication.setQty(cursor.getDouble(6));
+        return medication;
+    }
 
+    public Medication getMedication(long id) {
+        if (id == 0)
+            return null;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_MEDICATIONS, MEDS_COLUMNS," id = ?", new String[] { String.valueOf(id) }, null, null, null, null);
+        //if results != null, parse first
+        if (cursor != null)
+            cursor.moveToFirst();
+
+        Medication medication = new Medication();
+        medication.setId(Integer.parseInt(cursor.getString(0)));
+        medication.setName(cursor.getString(1));
+        medication.setDescription(cursor.getString(2));
+        medication.setSerialNo(cursor.getString(3));
+        medication.setQty(cursor.getDouble(4));
+        medication.setUom(cursor.getString(5));
         return medication;
     }
 
@@ -142,7 +148,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         List<Medication> medList = new ArrayList<>();
 
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_MEDICATION, null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_MEDICATIONS, null);
 
         //parse all results
         Medication medication;
@@ -153,15 +159,12 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 medication.setName(cursor.getString(1));
                 medication.setDescription(cursor.getString(2));
                 medication.setSerialNo(cursor.getString(3));
-
-                //medication.setDate(convertStringToDate(cursor.getString(4)));
-                medication.setUom(cursor.getString(5));
-                /*
                 try {
-                    medication.setQty(cursor.getDouble(6));
+                    medication.setQty(cursor.getDouble(4));
                 } catch (IllegalStateException ex) {
                     medication.setQty(0);
-                } */
+                }
+                medication.setUom(cursor.getString(5));
 
                 medList.add(medication);
             } while (cursor.moveToNext());
@@ -169,82 +172,18 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         return medList;
     }
 
-    public void addToHistory(History record) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        //make values
-        ContentValues values = new ContentValues();
-
-        values.put(HIST_MED_ID, record.getMedicationID());
-        values.put(HIST_QTY, record.getQty());
-        values.put(HIST_COMPLETED, record.isCompleted());
-        values.put(HIST_DATE, String.valueOf(record.getTime()));
-
-        //insert
-        db.insert(TABLE_HISTORY, null, values);
-        //close after transaction
-        db.close();
-    }
-
-    public List<History> getHistoryForAllMeds() {
-        List<History> histList = new ArrayList<>();
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_HISTORY, null);
-
-        //parse all results
-        History record;
-        if (cursor.moveToFirst()) {
-            do {
-                record = new History();
-                record.setId(Integer.parseInt(cursor.getString(0)));
-                record.setMedicationID(Integer.parseInt(cursor.getString(1)));
-                record.setCompleted(Integer.parseInt(cursor.getString(2)) != 0);
-                record.setQty(cursor.getDouble(3));
-                record.setTime(convertStringToDate(cursor.getString(4)));
-                record.setMedication(getMedication(Integer.parseInt(cursor.getString(1))));
-                histList.add(record);
-            } while (cursor.moveToNext());
-        }
-        return histList;
-    }
-
-    public List<History> getHistoryForToday() {
-        List<History> histList = new ArrayList<>();
-        String date = String.valueOf(Calendar.getInstance());
-        SQLiteDatabase db = this.getWritableDatabase();
-//        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_HISTORY + " WHERE TRIM(serial) = '"+ serial.trim() + " AND TRIM(date) = '"+ date.trim() +  "'", null);
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_HISTORY + " WHERE TRIM(date) = '"+ date.trim() + "'", null);
-
-        //parse all results
-        History record;
-        if (cursor.moveToFirst()) {
-            do {
-                record = new History();
-                record.setId(Integer.parseInt(cursor.getString(0)));
-                record.setMedicationID(Integer.parseInt(cursor.getString(1)));
-                record.setCompleted(Integer.parseInt(cursor.getString(2)) != 0);
-                record.setQty(cursor.getDouble(3));
-                record.setTime(convertStringToDate(cursor.getString(4)));
-                record.setMedication(getMedication(Integer.parseInt(cursor.getString(1))));
-
-                histList.add(record);
-            } while (cursor.moveToNext());
-        }
-        return histList;
-    }
-
     public void addScheduledEvent(ScheduledEvent record) {
         SQLiteDatabase db = this.getWritableDatabase();
         //make values
         ContentValues values = new ContentValues();
 
-        values.put(HIST_MED_ID, record.getMedicationID());
-        values.put(HIST_QTY, record.getQty());
-        values.put(HIST_COMPLETED, record.isCompleted());
-        values.put(HIST_DATE, String.valueOf(record.getTime()));
+        values.put(EVENT_MED_ID, record.getMedicationID());
+        values.put(EVENT_COMPLETED, record.isCompleted());
+        values.put(EVENT_QTY, record.getQty());
+        values.put(EVENT_DATE, String.valueOf(record.getTime()));
 
         //insert
-        db.insert(TABLE_SCHED_EVENT, null, values);
+        db.insert(TABLE_EVENTS, null, values);
         //close after transaction
         db.close();
     }
@@ -253,7 +192,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         List<ScheduledEvent> eventList = new ArrayList<>();
 
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SCHED_EVENT, null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_EVENTS, null);
 
         //parse all results
         ScheduledEvent record;
@@ -276,8 +215,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         List<ScheduledEvent> eventList = new ArrayList<>();
         String date = String.valueOf(Calendar.getInstance());
         SQLiteDatabase db = this.getWritableDatabase();
-//        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_HISTORY + " WHERE TRIM(serial) = '"+ serial.trim() + " AND TRIM(date) = '"+ date.trim() +  "'", null);
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SCHED_EVENT + " WHERE TRIM(date) = '"+ date.trim() + "'", null);
+//        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_EVENTS + " WHERE TRIM(date) = '"+ date.trim() + "'", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_EVENTS, null);
 
         //parse all results
         ScheduledEvent record;

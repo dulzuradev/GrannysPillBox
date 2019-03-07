@@ -34,6 +34,7 @@ import com.floorists.grannyspillbox.classes.Medication;
 import com.floorists.grannyspillbox.classes.ScheduledEvent;
 import com.floorists.grannyspillbox.utilities.BarcodeCaptureActivity;
 import com.floorists.grannyspillbox.utilities.DownloadImageTask;
+import com.floorists.grannyspillbox.utilities.SQLiteHelper;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity
     private TableLayout eventTable;
     private ArrayList<ScheduledEvent> mockdata = ScheduledEvent.getMockData();
     public int index = 0;
+    private SQLiteHelper sqLiteHelper;
 
 
     @Override
@@ -61,11 +63,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        /*eventTable = (TableLayout)findViewById(R.id.eventTable);
-        for(int i=0; i<mockdata.size(); i++) {
-            insertEvent(mockdata.get(i), i+1);
-        } */
 
+        sqLiteHelper = new SQLiteHelper(getApplicationContext());
+        mockdata.addAll(sqLiteHelper.getSchduledEvents());
         final EventsAdapter adapter = new EventsAdapter(this, mockdata);
         ListView listView = findViewById(R.id.testLv);
         View header = (View) getLayoutInflater().inflate(R.layout.scheduled_meds, null);
@@ -181,6 +181,8 @@ public class MainActivity extends AppCompatActivity
                         }
 
                         //TODO: Save event
+                        event.setMedicationID(sqLiteHelper.addMedication(medication));
+                        sqLiteHelper.addScheduledEvent(event);
                         mockdata.add(event);
                         adapter.notifyDataSetChanged();
 
