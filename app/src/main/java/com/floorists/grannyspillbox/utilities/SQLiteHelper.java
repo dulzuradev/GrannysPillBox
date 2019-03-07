@@ -201,7 +201,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 record.setCompleted(Integer.parseInt(cursor.getString(2)) != 0);
                 record.setQty(cursor.getDouble(3));
                 record.setTime(convertStringToDate(cursor.getString(4)));
-
+                record.setMedication(getMedication(Integer.parseInt(cursor.getString(1))));
                 histList.add(record);
             } while (cursor.moveToNext());
         }
@@ -225,7 +225,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 record.setCompleted(Integer.parseInt(cursor.getString(2)) != 0);
                 record.setQty(cursor.getDouble(3));
                 record.setTime(convertStringToDate(cursor.getString(4)));
-
+                record.setMedication(getMedication(Integer.parseInt(cursor.getString(1))));
 
                 histList.add(record);
             } while (cursor.moveToNext());
@@ -265,7 +265,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 record.setCompleted(Integer.parseInt(cursor.getString(2)) != 0);
                 record.setQty(cursor.getDouble(3));
                 record.setTime(convertStringToDate(cursor.getString(4)));
-
+                record.setMedication(getMedication(Integer.parseInt(cursor.getString(1))));
                 eventList.add(record);
             } while (cursor.moveToNext());
         }
@@ -289,7 +289,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 record.setCompleted(Integer.parseInt(cursor.getString(2)) != 0);
                 record.setQty(cursor.getDouble(3));
                 record.setTime(convertStringToDate(cursor.getString(4)));
-
+                record.setMedication(getMedication(Integer.parseInt(cursor.getString(1))));
 
                 eventList.add(record);
             } while (cursor.moveToNext());

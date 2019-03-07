@@ -1,5 +1,6 @@
 package com.floorists.grannyspillbox.classes;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class ScheduledEvent {
@@ -10,6 +11,18 @@ public class ScheduledEvent {
     public int medicationID;
     public Medication medication;
     public boolean completed;
+
+    public ScheduledEvent(){
+
+    }
+    public ScheduledEvent(int id, double qty, Date time, int medicationID, Medication medication, boolean completed) {
+        this.id = id;
+        this.qty = qty;
+        this.time = time;
+        this.medicationID = medicationID;
+        this.medication = medication;
+        this.completed = completed;
+    }
 
     public int getId(){
         return id;
@@ -62,5 +75,18 @@ public class ScheduledEvent {
 
     public void setMedication(Medication medication) {
         this.medication = medication;
+    }
+
+    @SuppressWarnings("deprecation")
+    public ArrayList<ScheduledEvent> getMockData() {
+        ArrayList<ScheduledEvent> mockData = new ArrayList<>();
+
+        mockData.add(new ScheduledEvent(1,  2.0, new Date(2019, 1, 1, 0, 0, 0), 1, null, false));
+        mockData.add(new ScheduledEvent(2,  2, new Date(2019, 2, 1, 0, 0, 0), 1, null, true));
+        mockData.add(new ScheduledEvent(3,  20.1, new Date(), 2, null, false));
+        mockData.add(new ScheduledEvent(4,  8.6, new Date(2019, 12, 1, 0, 0, 0), 3, null, false));
+        mockData.add(new ScheduledEvent(5,  3.7, new Date(2018, 12, 9, 0, 0, 0), 4, null, false));
+
+        return mockData;
     }
 }
