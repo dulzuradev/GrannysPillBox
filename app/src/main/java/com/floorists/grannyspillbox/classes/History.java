@@ -1,4 +1,4 @@
-package com.floorists.grannyspillbox;
+package com.floorists.grannyspillbox.classes;
 
 import java.util.Date;
 

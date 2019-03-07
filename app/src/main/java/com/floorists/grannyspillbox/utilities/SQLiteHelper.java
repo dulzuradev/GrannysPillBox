@@ -1,10 +1,13 @@
-package com.floorists.grannyspillbox;
+package com.floorists.grannyspillbox.utilities;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.floorists.grannyspillbox.History;
+import com.floorists.grannyspillbox.Medication;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
