@@ -20,7 +20,7 @@ import java.util.List;
 public class SQLiteHelper extends SQLiteOpenHelper {
 
     // database version
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 11;
     // database name
     private static final String DATABASE_NAME = "PillBoxDB";
     // table names
@@ -234,6 +234,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         return eventList;
+    }
+
+    public void deleteEvent(ScheduledEvent event) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_EVENTS, EVENT_ID + " = ?", new String[] { String.valueOf(event.getId())});
+        db.delete(TABLE_MEDICATIONS, MED_ID + " = ?", new String[] { String.valueOf(event.getMedicationID())});
+        db.close();
     }
 
 }

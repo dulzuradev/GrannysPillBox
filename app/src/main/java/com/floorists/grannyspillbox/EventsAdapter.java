@@ -1,6 +1,8 @@
 package com.floorists.grannyspillbox;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.floorists.grannyspillbox.classes.ScheduledEvent;
+import com.floorists.grannyspillbox.utilities.SQLiteHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,7 +26,7 @@ public class EventsAdapter extends ArrayAdapter<ScheduledEvent> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ScheduledEvent event = getItem(position);
+        final ScheduledEvent event = getItem(position);
 
         if(convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.scheduled_meds, parent, false);
@@ -43,6 +46,28 @@ public class EventsAdapter extends ArrayAdapter<ScheduledEvent> {
 
         }
 
+        convertView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setMessage("Remove medication from schedule?");
+                builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        remove(event);
+                        notifyDataSetChanged();
+                        SQLiteHelper sqLiteHelper = new SQLiteHelper(getContext());
+                        sqLiteHelper.deleteEvent(event);
+                    }
+                }).create().show();
+                return false;
+            }
+        });
 
         return convertView;
     }
