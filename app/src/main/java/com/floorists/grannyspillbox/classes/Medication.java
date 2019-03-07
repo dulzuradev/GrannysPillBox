@@ -8,9 +8,7 @@ public class Medication {
     public String name;
     public String description;
     public String serialNo;
-    public double qty;
     public String uom;
-    public Date date;
 
     public long getId() {
         return id;
@@ -44,13 +42,6 @@ public class Medication {
         this.serialNo = serialNo;
     }
 
-    public double getQty() {
-        return qty;
-    }
-
-    public void setQty(double qty) {
-        this.qty = qty;
-    }
 
     public String getUom() {
         return uom;
@@ -60,11 +51,4 @@ public class Medication {
         this.uom = uom;
     }
 
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
 }
