@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.floorists.grannyspillbox.classes.History;
 import com.floorists.grannyspillbox.classes.Medication;
 import com.floorists.grannyspillbox.classes.ScheduledEvent;
+import com.floorists.grannyspillbox.classes.User;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,6 +28,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String TABLE_MEDICATION = "medication";
     private static final String TABLE_HISTORY = "history";
     private static final String TABLE_SCHED_EVENT = "scheduled_event";
+    private static final String TABLE_USER = "user";
     // column names
     private static final String MED_ID = "id";
     private static final String MED_NAME = "name";
@@ -40,10 +42,18 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String HIST_COMPLETED = "completed";
     private static final String HIST_QTY = "qty";
     private static final String HIST_DATE = "date";
+    private static final String _ID = "id";
+    private static final String USER_FIRST = "first_name";
+    private static final String USER_LAST = "last_name";
+    private static final String USER_PHONE = "email";
+    private static final String USER_EMAIL = "phone";
+    private static final String USER_EMERGENCY_CONTACT_ID = "emergency_contact_id";
+
 
     private static final String[] MED_COLUMNS = { MED_ID, MED_NAME, MED_DESC, MED_SERIAL, MED_QTY, MED_DATE, MED_UOM };
     private static final String[] HIST_COLUMNS = { HIST_ID, HIST_MED_ID, HIST_COMPLETED, HIST_QTY, HIST_DATE};
     private static final String[] SCHED_EVENT_COLUMNS = HIST_COLUMNS;
+    private static final String[] USER_COLUMNS = {_ID, USER_FIRST, USER_LAST, USER_PHONE, USER_EMAIL, USER_EMERGENCY_CONTACT_ID};
     public SQLiteHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
@@ -92,6 +102,16 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 + "date TEXT, "
                 + "FOREIGN KEY(medication_id) REFERENCES medication(id))";
         db.execSQL(CREATE_SCHEDULED_EVENT_TABLE);
+
+        String CREATE_USER_TABLE = "CREATE TABLE USER ( "
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "first_name TEXT, "
+                + "last_name TEXT, "
+                + "phone TEXT, "
+                + "email TEXT, "
+                + "emergency_contact_id INTEGER,"
+                + "FOREIGN KEY(emergency_contact_id) REFERENCES user(id))";
+        db.execSQL(CREATE_USER_TABLE);
     }
 
     @Override
@@ -99,6 +119,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS medication");
         db.execSQL("DROP TABLE IF EXISTS history");
         db.execSQL("DROP TABLE IF EXISTS scheduled_event");
+        db.execSQL("DROP TABLE IF EXISTS user");
         this.onCreate(db);
     }
 
@@ -167,6 +188,58 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         return medList;
+    }
+    public void addUser(User user) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        //make values
+        ContentValues values = new ContentValues();
+        if (user.getId() > 0) {
+            values.put(_ID, user.getId());
+        }
+        values.put(USER_FIRST, user.getFirstName());
+        values.put(USER_LAST, user.getLastName());
+        values.put(USER_PHONE, user.getPhone());
+        values.put(USER_EMAIL, user.getEmail());
+        if (user.getEmergencyContact() != null && user.getEmergencyContact().getId() > 0) {
+            values.put(USER_EMERGENCY_CONTACT_ID, user.getEmergencyContact().getId());
+        }
+
+
+        if(user.getId() > 0) {
+            db.update(TABLE_USER,values, "id="+String.valueOf(user.getId()), null);
+        } else {
+            db.insert(TABLE_USER, null, values);
+        }
+
+        //insert
+
+        //close after transaction
+        db.close();
+    }
+
+    public User getUser(long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_USER, USER_COLUMNS," id = ?", new String[] { String.valueOf(id) }, null, null, null, null);
+        //if results != null, parse first
+        if (cursor != null)
+            cursor.moveToFirst();
+
+        User user = new User();
+        user.setId(Integer.parseInt(cursor.getString(0)));
+        user.setFirstName(cursor.getString(1));
+        user.setLastName(cursor.getString(2));
+        user.setPhone(cursor.getString(3));
+        //medication.setDate(convertStringToDate(cursor.getString(4)));
+        user.setEmail(cursor.getString(5));
+        int emergencyContactId = Integer.parseInt(cursor.getString(6));
+        if(emergencyContactId > 0) {
+            user.setEmergencyContact(getUser(emergencyContactId));
+        }
+
+        // medication.setQty(cursor.getDouble(6));
+
+        return user;
     }
 
     public void addToHistory(History record) {

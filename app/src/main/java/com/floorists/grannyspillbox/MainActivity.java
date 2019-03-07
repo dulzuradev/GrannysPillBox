@@ -219,6 +219,8 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, UserInfoActivity.class);
+            this.startActivity(intent);
             return true;
         }
 
@@ -286,7 +288,7 @@ public class MainActivity extends AppCompatActivity
 
          completedBox.setChecked(event.isCompleted());
 
-         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
          timeTextView.setText(sdf.format(event.getTime()));
          qtyTextView.setText(String.valueOf(event.getQty()));
          eventTable.addView(newEvent, index);

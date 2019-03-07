@@ -23,4 +23,5 @@
         <item>Day(s)</item>
     </string-array>
     <string name="add_medication">"Add Medication"</string>
+    <string name="title_activity_user_info">UserInfoActivity</string>
 </resources>
