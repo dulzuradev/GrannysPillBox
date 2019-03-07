@@ -1,10 +1,12 @@
 package com.floorists.grannyspillbox.classes;
 
+import java.util.Date;
+
 public class ScheduledEvent {
 
     public int id;
     public double qty;
-    public String time;
+    public Date time;
     public int medicationID;
     public Medication medication;
     public boolean completed;
@@ -12,7 +14,7 @@ public class ScheduledEvent {
     public int getId(){
         return id;
     }
-    public void setId() {
+    public void setId(int id) {
         this.id = id;
     }
     public int getMedicationID() {
@@ -42,11 +44,11 @@ public class ScheduledEvent {
         this.qty = qty;
     }
 
-    public String getTime() {
+    public Date getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(Date time) {
         this.time = time;
     }
 

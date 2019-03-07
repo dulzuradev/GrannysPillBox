@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.floorists.grannyspillbox.classes.History;
 import com.floorists.grannyspillbox.classes.Medication;
+import com.floorists.grannyspillbox.classes.ScheduledEvent;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,6 +26,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     // table names
     private static final String TABLE_MEDICATION = "medication";
     private static final String TABLE_HISTORY = "history";
+    private static final String TABLE_SCHED_EVENT = "scheduled_event";
     // column names
     private static final String MED_ID = "id";
     private static final String MED_NAME = "name";
@@ -96,6 +98,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS medication");
         db.execSQL("DROP TABLE IF EXISTS history");
+        db.execSQL("DROP TABLE IF EXISTS scheduled_event");
         this.onCreate(db);
     }
 
@@ -229,5 +232,70 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         }
         return histList;
     }
+
+    public void addScheduledEvent(ScheduledEvent record) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        //make values
+        ContentValues values = new ContentValues();
+
+        values.put(HIST_MED_ID, record.getMedicationID());
+        values.put(HIST_QTY, record.getQty());
+        values.put(HIST_COMPLETED, record.isCompleted());
+        values.put(HIST_DATE, String.valueOf(record.getTime()));
+
+        //insert
+        db.insert(TABLE_SCHED_EVENT, null, values);
+        //close after transaction
+        db.close();
+    }
+
+    public List<ScheduledEvent> getSchduledEvents() {
+        List<ScheduledEvent> eventList = new ArrayList<>();
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SCHED_EVENT, null);
+
+        //parse all results
+        ScheduledEvent record;
+        if (cursor.moveToFirst()) {
+            do {
+                record = new ScheduledEvent();
+                record.setId(Integer.parseInt(cursor.getString(0)));
+                record.setMedicationID(Integer.parseInt(cursor.getString(1)));
+                record.setCompleted(Integer.parseInt(cursor.getString(2)) != 0);
+                record.setQty(cursor.getDouble(3));
+                record.setTime(convertStringToDate(cursor.getString(4)));
+
+                eventList.add(record);
+            } while (cursor.moveToNext());
+        }
+        return eventList;
+    }
+
+    public List<ScheduledEvent> getSchedEventsForToday() {
+        List<ScheduledEvent> eventList = new ArrayList<>();
+        String date = String.valueOf(Calendar.getInstance());
+        SQLiteDatabase db = this.getWritableDatabase();
+//        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_HISTORY + " WHERE TRIM(serial) = '"+ serial.trim() + " AND TRIM(date) = '"+ date.trim() +  "'", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SCHED_EVENT + " WHERE TRIM(date) = '"+ date.trim() + "'", null);
+
+        //parse all results
+        ScheduledEvent record;
+        if (cursor.moveToFirst()) {
+            do {
+                record = new ScheduledEvent();
+                record.setId(Integer.parseInt(cursor.getString(0)));
+                record.setMedicationID(Integer.parseInt(cursor.getString(1)));
+                record.setCompleted(Integer.parseInt(cursor.getString(2)) != 0);
+                record.setQty(cursor.getDouble(3));
+                record.setTime(convertStringToDate(cursor.getString(4)));
+
+
+                eventList.add(record);
+            } while (cursor.moveToNext());
+        }
+        return eventList;
+    }
+
 }
 
