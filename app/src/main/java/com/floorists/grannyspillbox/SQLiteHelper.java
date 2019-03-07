@@ -50,7 +50,6 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         try {
             date = dateFormat.parse(sDate);
         } catch (ParseException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return date;
@@ -63,9 +62,9 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 + "name TEXT, "
                 + "description TEXT, "
                 + "serialNo TEXT, "
+                + "qty REAL, "
                 + "date TEXT, "
-                + "uom TEXT, "
-                + "qty REAL )";
+                + "uom TEXT )";
         db.execSQL(CREATE_MEDICATION_TABLE);
 
         String CREATE_HISTORY_TABLE = "CREATE TABLE history ( "
@@ -73,9 +72,9 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 + "name TEXT, "
                 + "description TEXT, "
                 + "serialNo TEXT, "
+                + "qty REAL, "
                 + "date TEXT, "
-                + "uom TEXT, "
-                + "qty REAL )";
+                + "uom TEXT )";
         db.execSQL(CREATE_HISTORY_TABLE);
     }
 
@@ -86,7 +85,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         this.onCreate(db);
     }
 
-    public void AddMedication(Medication medication) {
+    public void addMedication(Medication medication) {
         SQLiteDatabase db = this.getWritableDatabase();
         //make values
         ContentValues values = new ContentValues();
@@ -102,7 +101,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public Medication GetMedication(long id) {
+    public Medication getMedication(long id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_MEDICATION, MED_COLUMNS," id = ?", new String[] { String.valueOf(id) }, null, null, null, null);
@@ -122,7 +121,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         return medication;
     }
 
-    public List<Medication> GetAllMedications() {
+    public List<Medication> getAllMedications() {
         List<Medication> medList = new ArrayList<>();
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -151,7 +150,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         return medList;
     }
 
-    public void AddToHistory(History record) {
+    public void addToHistory(History record) {
         SQLiteDatabase db = this.getWritableDatabase();
         //make values
         ContentValues values = new ContentValues();
@@ -167,11 +166,41 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public List<History> GetHistoryForAllMeds() {
+    public List<History> getHistoryForAllMeds() {
         List<History> histList = new ArrayList<>();
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_HISTORY, null);
+
+        //parse all results
+        History record;
+        if (cursor.moveToFirst()) {
+            do {
+                record = new History();
+                record.setId(Integer.parseInt(cursor.getString(0)));
+                record.setName(cursor.getString(1));
+                record.setDescription(cursor.getString(2));
+                record.setSerialNo(cursor.getString(3));
+                record.setDate(convertStringToDate(cursor.getString(4)));
+                record.setUom(cursor.getString(5));
+                try {
+                    record.setQty(cursor.getDouble(6));
+                } catch (IllegalStateException ex) {
+                    record.setQty(0);
+                }
+
+                histList.add(record);
+            } while (cursor.moveToNext());
+        }
+        return histList;
+    }
+
+    public List<History> getHistoryForToday() {
+        List<History> histList = new ArrayList<>();
+        String date = String.valueOf(Calendar.getInstance());
+        SQLiteDatabase db = this.getWritableDatabase();
+//        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_HISTORY + " WHERE TRIM(serial) = '"+ serial.trim() + " AND TRIM(date) = '"+ date.trim() +  "'", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_HISTORY + " WHERE TRIM(date) = '"+ date.trim() + "'", null);
 
         //parse all results
         History record;
