@@ -67,7 +67,10 @@ public class MainActivity extends AppCompatActivity
 
         final EventsAdapter adapter = new EventsAdapter(this, mockdata);
         ListView listView = findViewById(R.id.testLv);
+        View header = (View) getLayoutInflater().inflate(R.layout.scheduled_meds, null);
+        listView.addHeaderView(header);
         listView.setAdapter(adapter);
+
 
         final SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
 
